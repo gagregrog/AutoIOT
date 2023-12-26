@@ -1,0 +1,27 @@
+{
+  "name": "AutoIOT",
+  "version": "1.0.0",
+  "description": "Library for initiating a WiFi connection and enabling OTA updates on an ESP8266/ESP32.",
+  "keywords": "esp8266, esp32, WiFi, ap, WiFiManager, ota",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gagregrog/AutoIOT.git"
+  },
+  "authors": [
+    {
+      "name": "Gary Gregory Rogers",
+      "email": "gagregrog@gmail.com",
+      "url": "https://github.com/gagregrog",
+      "maintainer": true
+    }
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/gagregrog/AutoIOT",
+  "dependencies": {
+    "WiFiManager": "https://github.com/gagregrog/WiFiManager.git#v2.0.15-rc.1",
+    "ESPAsyncWebServer": "https://github.com/gagregrog/ESPAsyncWebServer",
+    "ArduinoJson": "https://github.com/bblanchon/ArduinoJson@^6.17.2"
+  },
+  "frameworks": "arduino",
+  "platforms": ["espressif8266", "espressif32"]
+}
