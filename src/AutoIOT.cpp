@@ -209,7 +209,7 @@ void AutoIOT::resetAllSettings()
 
 void AutoIOT::_readConfig()
 {
-  DynamicJsonDocument json(256);
+  DynamicJsonDocument json(128);
   readConfig(CONFIG_PATH, json);
   serializeJsonPretty(json, Serial);
   if (json.containsKey("hostname"))
@@ -244,7 +244,7 @@ void AutoIOT::_writeConfig(const char *updatedHostname, const char *updatedPassw
     return;
   }
 
-  DynamicJsonDocument json(256);
+  DynamicJsonDocument json(128);
   json["hostname"] = updatedHostname;
   strcpy(_hostname, updatedHostname);
 
