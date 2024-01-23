@@ -12,12 +12,8 @@
 #define FileSystem LittleFS
 #endif
 
-#define CONFIG_MAX_LENGTH 40
-#define CONFIG_PATH "/config.json"
-
-void resetConfig();
-bool readConfig();
-void writeConfig(const char *accessPoint, const char *password);
-bool initFileSystem();
+void resetConfig(const char *path);
+bool readConfig(const char *path, DynamicJsonDocument &json);
+void writeConfig(const char *path, DynamicJsonDocument &json);
 
 #endif

@@ -1,11 +1,7 @@
 #include "AutoIOTConfig.h"
 
-char hostname[CONFIG_MAX_LENGTH] = "autoIOT";
-char otaPassword[CONFIG_MAX_LENGTH] = "newcouch";
-
 bool initFileSystem()
 {
-  Serial.println(F("[INFO] Mounting File System..."));
 #ifdef ESP32
   if (!(SPIFFS.begin(false) || SPIFFS.begin(true)))
 #elif defined(ESP8266)
@@ -19,7 +15,7 @@ bool initFileSystem()
   return true;
 }
 
-bool readConfig()
+bool readConfig(const char *path, DynamicJsonDocument &json)
 {
   if (!initFileSystem())
   {
@@ -27,14 +23,17 @@ bool readConfig()
   }
   Serial.println(F("[SUCCESS] File System Mounted"));
 
-  if (!FileSystem.exists(CONFIG_PATH))
+  if (!FileSystem.exists(path))
   {
-    Serial.println(F("[WARNING] Config not found"));
+    Serial.print(F("[WARNING] Config not found at "));
+    Serial.println(path);
     return false;
   }
 
-  Serial.println(F("[INFO] Reading existing config..."));
-  File configFile = FileSystem.open(CONFIG_PATH, "r");
+  Serial.print(F("[INFO] Reading existing config at "));
+  Serial.print(path);
+  Serial.println(F("..."));
+  File configFile = FileSystem.open(path, "r");
 
   if (!configFile)
   {
@@ -44,13 +43,7 @@ bool readConfig()
 
   Serial.println(F("[SUCCESS] Existing config loaded"));
 
-  // maybe change this bit
-  size_t size = configFile.size();
-  // Allocate a buffer to store the file contents
-  std::unique_ptr<char[]> buf(new char[size]);
-  configFile.readBytes(buf.get(), size);
-  StaticJsonDocument<256> json;
-  DeserializationError jsonError = deserializeJson(json, buf.get());
+  DeserializationError jsonError = deserializeJson(json, configFile);
 
   if (jsonError)
   {
@@ -62,88 +55,55 @@ bool readConfig()
   serializeJsonPretty(json, Serial);
   Serial.println();
 
-  if (json.containsKey("hostname"))
-  {
-    strcpy(hostname, json["hostname"]);
-    Serial.print("[INFO] Setting hostname/access point to: ");
-    Serial.println(hostname);
-  }
-  else
-  {
-    Serial.print("[WARNING] hostname not in config");
-  }
-
-  if (json.containsKey("password"))
-  {
-    strcpy(otaPassword, json["password"]);
-    Serial.print("[INFO] Setting password to: ");
-    Serial.println(otaPassword);
-  }
-  else
-  {
-    Serial.print("[WARNING] password not in config");
-  }
-
-  Serial.println();
-
   return true;
 }
 
-void writeConfig(const char *updatedHostname, const char *updatedPassword)
+bool _writeJson(const char *path, DynamicJsonDocument &json)
 {
-  if ((strcmp(updatedHostname, hostname) + strcmp(updatedPassword, otaPassword)) == 0)
+  if (!initFileSystem())
   {
-    Serial.println(F("[INFO] Config is unchanged -- no need to write"));
-    return;
+    return false;
   }
 
-  StaticJsonDocument<256> json;
-
-  json["hostname"] = updatedHostname;
-  strcpy(hostname, updatedHostname);
-
-  json["password"] = updatedPassword;
-  strcpy(otaPassword, updatedPassword);
-
-  Serial.println(F("[INFO] Saving config..."));
-
-  File configFile = FileSystem.open(CONFIG_PATH, "w");
+  File configFile = FileSystem.open(path, "w");
   if (!configFile)
   {
     Serial.println(F("[ERROR] Failed to open config file for writing"));
-    return;
+    return false;
   }
 
-  serializeJsonPretty(json, Serial);
-  Serial.println();
-
+  bool isSuccess = true;
   if (serializeJson(json, configFile) == 0)
   {
     Serial.println(F("[ERROR] Failed to write file"));
+    isSuccess = false;
   }
 
   configFile.close();
+
+  return isSuccess;
 }
 
-void resetConfig()
+void writeConfig(const char *path, DynamicJsonDocument &json)
+{
+  Serial.print(F("[INFO] Saving config to "));
+  Serial.print(path);
+  Serial.println(F("..."));
+
+  if (_writeJson(path, json))
+  {
+    serializeJsonPretty(json, Serial);
+    Serial.println();
+  }
+}
+
+void resetConfig(const char *path)
 {
   DynamicJsonDocument emptyDoc(0);
   emptyDoc.to<JsonObject>();
 
-  if (!initFileSystem())
-  {
-    return;
-  }
+  Serial.print(F("[WARNING] Resetting config at "));
+  Serial.println(path);
 
-  Serial.println("[WARNING] Resetting config...");
-  File configFile = FileSystem.open(CONFIG_PATH, "w");
-
-  if (!configFile)
-  {
-    Serial.println(F("[ERROR] Failed to open config file for writing"));
-    return;
-  }
-
-  serializeJson(emptyDoc, configFile);
-  configFile.close();
+  _writeJson(path, emptyDoc);
 }

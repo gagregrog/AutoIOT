@@ -4,7 +4,6 @@
   Released into the public domain.
 */
 
-#include <ArduinoJson.h>
 #include <AutoIOT.h>
 
 // Instantiate the app
@@ -13,11 +12,12 @@
 // default PW: "newcouch"
 AutoIOT app;
 
-// explicitly enable/disable ArduinoOTA (false by default if no pw provided)
+// explicitly enable/disable ArduinoOTA (true by default)
 // mDNS does not work on ESP8266 without ArduinoOTA
-// AutoIOT app(true);
+// AutoIOT app(false);
 
-// Specify access point / hostname and password
+// Specify access point/hostname and password
+// max of 40 chars for each
 // AutoIOT app("my_ap", "my_pw"); // OTA enabled by default if pw provided
 
 // AutoIOT app("my_ap", "my_pw", false); // do it all (set ap/pw and disable OTA)
@@ -48,7 +48,8 @@ void setup()
   // if you need to fetch the current hostname
   // String hostname = app.wifiManager.getHostname();
 
-  // to change the WiFi and erase the file system (with custom hostname/pw) (pass true to also reset the board (ie force the config portal))
+  // to change the WiFi and erase the config (with custom hostname/pw)
+  // this will also reboot the board
   // app.resetAllSettings();
 
   // disable LED indicator if desired (call before app.begin();)
@@ -66,7 +67,25 @@ void setup()
   app.setOnEnterConfig(handleConfig);
 
   app.begin();
-  // do any server / ws setup here
+
+  // do any additional server / ws setup here
+
+  // you can use the AutoIOTConfig functions to simplify reading/writing json documents
+  DynamicJsonDocument appConfig(256);
+  const char appConfigPath[] = "/app.json";
+
+  if (!readConfig(appConfigPath, appConfig))
+  {
+    // config was not loaded, so init with defaults
+    appConfig["enabled"] = true;
+    writeConfig(appConfigPath, appConfig);
+  }
+  else
+  {
+    bool enabled = appConfig["enabled"].as<bool>();
+    Serial.print(F("App is "));
+    Serial.println(enabled ? "enabled!" : "disabled");
+  }
 }
 
 void loop()
