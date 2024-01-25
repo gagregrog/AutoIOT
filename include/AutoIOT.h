@@ -14,8 +14,6 @@
 #include <WiFi.h>
 #include <ESPmDNS.h>
 #elif defined(ESP8266)
-// this #define prevents an incompatibility between ESPAsyncWebServer and WifiManager
-#define WEBSERVER_H
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #endif
