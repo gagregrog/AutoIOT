@@ -20,7 +20,7 @@
   "dependencies": {
     "WiFiManager": "https://github.com/gagregrog/WiFiManager.git#async-server-compatibility",
     "ESPAsyncWebServer": "https://github.com/gagregrog/ESPAsyncWebServer",
-    "ArduinoJson": "https://github.com/bblanchon/ArduinoJson@^6.17.2"
+    "ArduinoJson": "https://github.com/bblanchon/ArduinoJson#6.x"
   },
   "frameworks": "arduino",
   "platforms": ["espressif8266", "espressif32"]
