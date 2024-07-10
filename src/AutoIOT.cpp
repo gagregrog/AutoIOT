@@ -124,7 +124,7 @@ void AutoIOT::begin()
   Serial.println(WiFi.localIP());
 
 #ifdef ESP32
-  WiFi.setHostname(hostname);
+  WiFi.setHostname(_hostname);
 #elif defined(ESP8266)
   // esp8266mDNS does not work without ArduinoOTA
   // so this line is likely not doing what we want it to do
